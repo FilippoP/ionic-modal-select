@@ -356,6 +356,7 @@
 						scope.isChecked = {};
 						scope.modal.hide();
 						scope.showList = false;
+						counter = 0;
 						if (scope.onReset && angular.isFunction(scope.onReset)) {
 							scope.onReset();
 						}
