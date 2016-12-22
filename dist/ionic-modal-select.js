@@ -98,10 +98,9 @@
 	}
 	
 	function modalSelect($ionicModal, $timeout, $filter, $parse, $templateCache) {
-	
 		var modalTemplateMultiple = __webpack_require__(2);
 		var modalTemplate = __webpack_require__(3);
-	
+		var counter = 0;
 		return {
 			restrict: 'A',
 			require: 'ngModel',
@@ -123,16 +122,19 @@
 				var onOptionSelect = iAttrs.optionGetter;
 				var clearSearchOnSelect = iAttrs.clearSearchOnSelect !== "false" ? true : false;
 				var searchProperties = scope.searchProperties ? scope.searchProperties : false;
-	
+				var countLimit = -1;
 				//multiple values settings.
 				var multiple = iAttrs.multiple ? true : false;
+				var modalTitle = iAttrs.modalTitle ? iAttrs.modalTitle : '';
 				if (multiple) {
 					scope.isChecked = {};
+					countLimit = iAttrs.countLimit ? iAttrs.countLimit : -1;
+					if(countLimit > 0)
+						modalTitle += ' (max. ' + countLimit + ')';
 				}
 				var multipleNullValue = iAttrs.multipleNullValue ? scope.$eval(iAttrs.multipleNullValue) : [];
-	
 				scope.ui = {
-					modalTitle: iAttrs.modalTitle || 'Select an option',
+					modalTitle: modalTitle || 'Select an option',
 					okButton: iAttrs.okButton || 'OK',
 					hideReset: iAttrs.hideReset !== "true" ? false : true,
 					resetButton: iAttrs.resetButton || 'Reset',
@@ -333,7 +335,20 @@
 						}
 					});
 				};
-	
+				
+				scope.clickCheckboxElement = function(el, event) {
+					var target = event.target;
+					if(target.checked)
+						counter++;
+					else
+						counter--;
+					if(countLimit > 0 && counter > countLimit) {
+						target.checked = false;
+						el.isChecked[el.optionm[0]] = false;
+						counter--;						
+					}
+				};
+				
 				scope.unsetValues = function () {
 					$timeout(function () {
 						ngModelController.$setViewValue(multipleNullValue);
@@ -469,8 +484,7 @@
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
-
-	module.exports = " <ion-modal-view class=\"ionic-select-modal\" ng-class=\"::ui.modalClass\">\n\n    <ion-header-bar ng-class=\"::ui.headerFooterClass\">\n      <h1 class=\"title\">{{::ui.modalTitle}}</h1>\n    </ion-header-bar>\n\n    <div class=\"bar bar-subheader item-input-inset\" ng-class=\"::ui.subHeaderClass\" ng-if=\"ui.hasSearch\">\n      <label class=\"item-input-wrapper\">\n        <i class=\"icon ion-ios-search placeholder-icon\"></i>\n        <input type=\"search\" placeholder=\"{{::ui.searchPlaceholder}}\" ng-model=\"ui.searchValue\">\n      </label>\n      <button type=\"button\" class=\"button button-clear\" ng-click=\"clearSearch()\">\n        {{ ui.cancelSearchButton }}\n      </button>\n    </div>\n\n    <ion-content class=\"has-header\" ng-class=\"{'has-subheader':ui.hasSearch}\">\n    <div class=\"text-center\" ng-if=\"!ui.shortList && !showList\" style=\"padding-top:40px;\">\n        <h4 class=\"muted\">{{::ui.loadListMessage}}</h4>\n        <p>\n            <ion-spinner></ion-spinner>\n        </p>\n    </div>\n\n    <div ng-if=\"showList\">\n        <!--collection-repeat mode -->\n        <!-- not working right now -->\n        <!--\n        <div ng-if=\"!ui.shortList\" >\n            <div class=\"list\" class=\"animate-if\" >\n                <div\n                    class=\"item item-checkbox\" ng-class=\"ui.itemClass\"\n                     collection-repeat=\"optionm in options track by $index\">\n                    <label class=\"checkbox\">\n                        <input type=\"checkbox\" ng-model=\"isChecked[optionm[0]]\">\n                    </label>\n\n                    <div compile=\"inner\" ng-init=\"option=optionm[1]\" compile-once=\"false\"></div>\n\n                </div>\n            </div>\n        </div>\n        -->\n\n        <!-- ng-repeat mode -->\n        <div ng-if=\"ui.shortList || true\">\n            <div class=\"list\">\n                <div\n                  class=\"item item-checkbox\" ng-class=\"ui.itemClass\"\n                  ng-repeat=\"optionm in options track by optionm[0]\">\n                    <label class=\"checkbox\">\n                        <input type=\"checkbox\" ng-model=\"isChecked[optionm[0]]\">\n                    </label>\n                    <div ng-init=\"option=optionm[1]\" compile=\"inner\" compile-once=\"true\"></div>\n                </div>\n            </div>\n        </div>\n    </div>\n    </ion-content>\n    <ion-footer-bar ng-class=\"::ui.headerFooterClass\">\n        <button class=\"button button-stable\" ng-click=\"closeModal()\">{{ui.cancelButton}}</button>\n        <div class=\"title\" style=\"padding-top:6px\">\n            <button class=\"button button-navbar\" ng-click=\"setValues()\">OK</button>\n        </div>\n        <button ng-if=\"::!ui.hideReset\" class=\"button button-stable\" ng-click=\"unsetValues()\">{{ui.resetButton}}</button>\n    </ion-footer-bar>\n</ion-modal-view>\n"
+	module.exports = " <ion-modal-view class=\"ionic-select-modal\" ng-class=\"::ui.modalClass\">\n\n    <ion-header-bar ng-class=\"::ui.headerFooterClass\">\n      <h1 class=\"title\">{{::ui.modalTitle}}</h1>\n    </ion-header-bar>\n\n    <div class=\"bar bar-subheader item-input-inset\" ng-class=\"::ui.subHeaderClass\" ng-if=\"ui.hasSearch\">\n      <label class=\"item-input-wrapper\">\n        <i class=\"icon ion-ios-search placeholder-icon\"></i>\n        <input type=\"search\" placeholder=\"{{::ui.searchPlaceholder}}\" ng-model=\"ui.searchValue\">\n      </label>\n      <button type=\"button\" class=\"button button-clear\" ng-click=\"clearSearch()\">\n        {{ ui.cancelSearchButton }}\n      </button>\n    </div>\n\n    <ion-content class=\"has-header\" ng-class=\"{'has-subheader':ui.hasSearch}\">\n    <div class=\"text-center\" ng-if=\"!ui.shortList && !showList\" style=\"padding-top:40px;\">\n        <h4 class=\"muted\">{{::ui.loadListMessage}}</h4>\n        <p>\n            <ion-spinner></ion-spinner>\n        </p>\n    </div>\n\n    <div ng-if=\"showList\">\n        <!--collection-repeat mode -->\n        <!-- not working right now -->\n        <!--\n        <div ng-if=\"!ui.shortList\" >\n            <div class=\"list\" class=\"animate-if\" >\n                <div\n                    class=\"item item-checkbox\" ng-class=\"ui.itemClass\"\n                     collection-repeat=\"optionm in options track by $index\">\n                    <label class=\"checkbox\">\n                        <input type=\"checkbox\" ng-model=\"isChecked[optionm[0]]\" ng-click=\"clickCheckboxElement(this, $event)\">\n                    </label>\n\n                    <div compile=\"inner\" ng-init=\"option=optionm[1]\" compile-once=\"false\"></div>\n\n                </div>\n            </div>\n        </div>\n        -->\n\n        <!-- ng-repeat mode -->\n        <div ng-if=\"ui.shortList || true\">\n            <div class=\"list\">\n                <div\n                  class=\"item item-checkbox\" ng-class=\"ui.itemClass\"\n                  ng-repeat=\"optionm in options track by optionm[0]\">\n                    <label class=\"checkbox\">\n                        <input type=\"checkbox\" ng-model=\"isChecked[optionm[0]]\" ng-click=\"clickCheckboxElement(this, $event)\">\n                    </label>\n                    <div ng-init=\"option=optionm[1]\" compile=\"inner\" compile-once=\"true\"></div>\n                </div>\n            </div>\n        </div>\n    </div>\n    </ion-content>\n    <ion-footer-bar ng-class=\"::ui.headerFooterClass\">\n        <button class=\"button button-stable\" ng-click=\"closeModal()\">{{ui.cancelButton}}</button>\n        <div class=\"title\" style=\"padding-top:6px\">\n            <button class=\"button button-navbar\" ng-click=\"setValues()\">OK</button>\n        </div>\n        <button ng-if=\"::!ui.hideReset\" class=\"button button-stable\" ng-click=\"unsetValues()\">{{ui.resetButton}}</button>\n    </ion-footer-bar>\n</ion-modal-view>\n"
 
 /***/ },
 /* 3 */
